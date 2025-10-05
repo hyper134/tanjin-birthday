@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Birthday Tanjin 🎉</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#ff6b6b;--accent2:#ffd166}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background: radial-gradient(1200px 600px at 10% 20%, rgba(255,107,107,0.08), transparent), radial-gradient(900px 400px at 90% 80%, rgba(255,209,102,0.05), transparent), var(--bg); color:#fff; overflow:hidden}
+
+    /* center card */
+    .stage{position:relative;min-height:100vh;display:grid;place-items:center;padding:40px}
+    .card{width:min(980px,95%);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:20px;padding:36px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px);position:relative;overflow:visible}
+
+    h1{font-size:clamp(28px,6vw,64px);margin:0 0 8px;letter-spacing:1px;text-align:center}
+    .sub{font-size:clamp(14px,2.2vw,20px);text-align:center;opacity:0.9;margin-bottom:18px}
+
+    /* name sparkle */
+    .name{display:inline-block;position:relative;padding:6px 14px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#08111a;font-weight:700;font-size:1.1em}
+
+    /* confetti canvas covers whole screen */
+    canvas#confetti{position:fixed;left:0;top:0;pointer-events:none;z-index:9}
+
+    /* balloons */
+    .balloons{position:absolute;inset:0;pointer-events:none;z-index:3}
+    .balloon{position:absolute;width:80px;height:110px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;transform-origin:center bottom;opacity:0.95}
+    .balloon::after{content:'';position:absolute;left:50%;top:86%;width:2px;height:40px;background:rgba(255,255,255,0.12);transform:translateX(-50%)}
+
+    /* floating animation for balloons */
+    @keyframes floaty {0%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-28px) rotate(3deg)}100%{transform:translateY(0) rotate(-3deg)}}
+
+    /* controls */
+    .controls{display:flex;gap:10px;justify-content:center;margin-top:18px}
+    .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:12px;color:#fff;cursor:pointer;font-weight:600}
+    .btn:active{transform:translateY(1px)}
+
+    /* countdown & message */
+    .row{display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .count{background:rgba(255,255,255,0.03);padding:12px 16px;border-radius:12px;min-width:110px;text-align:center}
+    .count strong{display:block;font-size:20px}
+    .message{margin-top:18px;text-align:center;font-size:18px}
+
+    /* footer small */
+    .footer{opacity:0.6;text-align:center;margin-top:26px;font-size:13px}
+
+    /* start overlay */
+    .start-overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(6,10,15,0.55), rgba(2,6,23,0.9));display:grid;place-items:center;z-index:20}
+    .start-card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:28px;border-radius:16px;text-align:center}
+    .start-card p{margin:8px 0 16px}
+
+    /* small responsive tweaks */
+    @media (max-width:520px){.card{padding:20px} .balloon{width:54px;height:80px}}
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="balloons" aria-hidden="true">
+    <div class="balloon" style="left:8%;bottom:10%;background:linear-gradient(180deg,#ff9a9e,#fecfef);animation:floaty 6s ease-in-out infinite;animation-delay:0s"></div>
+    <div class="balloon" style="left:20%;bottom:6%;background:linear-gradient(180deg,#a18cd1,#fbc2eb);animation:floaty 5.8s infinite;animation-delay:.6s"></div>
+    <div class="balloon" style="left:36%;bottom:12%;background:linear-gradient(180deg,#89f7fe,#66a6ff);animation:floaty 6.6s infinite;animation-delay:1.2s"></div>
+    <div class="balloon" style="left:60%;bottom:8%;background:linear-gradient(180deg,#ffecd2,#fcb69f);animation:floaty 5.4s infinite;animation-delay:.3s"></div>
+    <div class="balloon" style="left:80%;bottom:14%;background:linear-gradient(180deg,#cfd9df,#e2ebf0);animation:floaty 6.2s infinite;animation-delay:.9s"></div>
+  </div>
+
+  <div class="stage">
+    <div class="card" role="main">
+      <h1><span class="name">Happy Birthday Tanjin 🎉</span></h1>
+      <div class="sub">Wishing you joy, cake, and good vibes — October 9, 2025</div>
+
+      <div class="row" aria-hidden="false">
+        <div class="count" aria-live="polite"><small>Days</small><strong id="days">--</strong></div>
+        <div class="count" aria-live="polite"><small>Hours</small><strong id="hours">--</strong></div>
+        <div class="count" aria-live="polite"><small>Minutes</small><strong id="mins">--</strong></div>
+        <div class="count" aria-live="polite"><small>Seconds</small><strong id="secs">--</strong></div>
+      </div>
+
+      <div class="message" id="messageText">"Happy Birthday"</div>
+
+      <div class="controls">
+        <button class="btn" id="toggleMusic">▶ Play Music</button>
+        <button class="btn" id="burstConfetti">✨ Burst Confetti</button>
+        <button class="btn" id="toggleBalloons">🎈 Toggle Balloons</button>
+      </div>
+
+      <div class="footer">Edit text, replace the audio file (audio/birthday.mp3) or paste a YouTube link in the source. Open this file in your browser to view.</div>
+
+      <!-- Hidden audio element: replace src with your favorite birthday track file or URL. -->
+      <audio id="bgAudio" loop preload="auto">
+        <!-- Placeholder: Replace with a path to your MP3 (e.g. "birthday.mp3") -->
+        <source src="audio/birthday.mp3" type="audio/mpeg">
+        <!-- If you want to use YouTube, remove audio tag and embed the iframe instead. -->
+      </audio>
+    </div>
+  </div>
+
+  <!-- start overlay: browsers require user gesture to start autoplaying audio on many devices -->
+  <div class="start-overlay" id="startOverlay">
+    <div class="start-card">
+      <h2>Hey — ready to celebrate?</h2>
+      <p>Click Start to begin music, confetti and balloons for <strong>Tanjin</strong>.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn" id="startBtn">Start the Party 🎉</button>
+        <button class="btn" id="skipBtn">Skip (no sound)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ====== Config from user ====== */
+    const targetDate = new Date('2025-10-09T00:00:00'); // October 9, 2025 (midnight local time)
+    const birthdayMessage = 'Happy Birthday';
+
+    document.getElementById('messageText').textContent = '"' + birthdayMessage + '"';
+
+    /* ====== Countdown ====== */
+    function updateCountdown(){
+      const now = new Date();
+      const diff = targetDate - now;
+      if(diff <= 0){
+        document.getElementById('days').textContent = '0';
+        document.getElementById('hours').textContent = '0';
+        document.getElementById('mins').textContent = '0';
+        document.getElementById('secs').textContent = '0';
+        return;
+      }
+      const s = Math.floor(diff/1000);
+      const days = Math.floor(s/(3600*24));
+      const hours = Math.floor((s%(3600*24))/3600);
+      const mins = Math.floor((s%3600)/60);
+      const secs = s%60;
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = String(hours).padStart(2,'0');
+      document.getElementById('mins').textContent = String(mins).padStart(2,'0');
+      document.getElementById('secs').textContent = String(secs).padStart(2,'0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown,1000);
+
+    /* ====== Balloons toggle ====== */
+    const balloons = document.querySelector('.balloons');
+    document.getElementById('toggleBalloons').addEventListener('click', ()=>{
+      balloons.style.display = (balloons.style.display === 'none') ? 'block' : 'none';
+    });
+
+    /* ====== Audio control ====== */
+    const audio = document.getElementById('bgAudio');
+    const toggleBtn = document.getElementById('toggleMusic');
+    toggleBtn.addEventListener('click',()=>{
+      if(audio.paused){ audio.play().catch(()=>{}); toggleBtn.textContent='⏸ Pause Music'; }
+      else{ audio.pause(); toggleBtn.textContent='▶ Play Music'; }
+    });
+
+    /* ====== Confetti ====== */
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    function resizeCanvas(){confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight;}
+    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+
+    function random(min,max){return Math.random()*(max-min)+min}
+    function createConfetti(x,y,count=80){
+      for(let i=0;i<count;i++){
+        confettiPieces.push({x:x||random(0,confettiCanvas.width),y:y||random(0,confettiCanvas.height/2),vx:random(-6,6),vy:random(-10,2),size:random(6,12),angle:random(0,Math.PI*2),spin:random(-0.2,0.2),color:['#ff6b6b','#ffd166','#6bcbe8','#9b5de5','#00bbad'][Math.floor(random(0,5))]});
+      }
+    }
+    function stepConfetti(){
+      ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      for(let i=confettiPieces.length-1;i>=0;i--){
+        const p = confettiPieces[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.angle += p.spin;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+        ctx.restore();
+        if(p.y > confettiCanvas.height + 40) confettiPieces.splice(i,1);
+      }
+      requestAnimationFrame(stepConfetti);
+    }
+    stepConfetti();
+
+    document.getElementById('burstConfetti').addEventListener('click', ()=>{
+      createConfetti(null, null, 160);
+    });
+
+    /* start overlay behavior */
+    const overlay = document.getElementById('startOverlay');
+    document.getElementById('startBtn').addEventListener('click', ()=>{
+      overlay.style.display='none';
+      // start audio & small confetti burst
+      audio.play().catch(()=>{});
+      document.getElementById('toggleMusic').textContent='⏸ Pause Music';
+      createConfetti(null,null,180);
+    });
+    document.getElementById('skipBtn').addEventListener('click', ()=>{overlay.style.display='none'; createConfetti(null,null,60);});
+
+    /* small accessibility: keyboard shortcut P for party */
+    window.addEventListener('keydown', (e)=>{if(e.key.toLowerCase()==='p'){createConfetti(null,null,120); audio.play().catch(()=>{}); document.getElementById('toggleMusic').textContent='⏸ Pause Music';}});
+
+    /* Auto-burst when date arrives */
+    setInterval(()=>{
+      const now = new Date();
+      if(now.toDateString() === targetDate.toDateString()){
+        createConfetti(null,null,300);
+        document.getElementById('messageText').textContent = "It's Today — Happy Birthday Tanjin!";
+      }
+    },60000);
+
+    // Helpful: let users change name quickly via prompt (optional)
+    const nameEl = document.querySelector('.name');
+    nameEl.addEventListener('click', ()=>{
+      const newName = prompt('Change display name','Happy Birthday Tanjin 🎉');
+      if(newName) nameEl.textContent = newName;
+    });
+  </script>
+</body>
+</html>
